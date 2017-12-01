@@ -76,8 +76,8 @@ def gen_random_image():
         r_x = rn.randint(10, 50)
         r_y = rn.randint(10, 50)
         if(center_x+r_x < IMAGE_W and center_x-r_x > 0 and center_y+r_y < IMAGE_H and center_y-r_y > 0):
-            cv2.ellipse(img, (center_x, center_y), (r_x, r_y), 0, 0, 360, (obj1_color0, obj1_color1, obj1_color2), -1)
-            cv2.ellipse(mask_obj1, (center_x, center_y), (r_x, r_y), 0, 0, 360, 255, -1)
+            cv2.ellipse(img, (int(center_x), int(center_y)), (int(r_x), int(r_y)), int(0), int(0), int(360), (int(obj1_color0), int(obj1_color1), int(obj1_color2)), int(-1))
+            cv2.ellipse(mask_obj1, (int(center_x), int(center_y)), (int(r_x), int(r_y)), int(0), int(0), int(360), int(255), int(-1))
             break
     
     mask[:,:,0] = np.squeeze(mask_obj1)

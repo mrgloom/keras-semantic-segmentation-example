@@ -1,53 +1,12 @@
 # coding: utf-8
 
-########################################################################################################################################
-# https://keras.io/getting-started/faq/#how-can-i-obtain-reproducible-results-using-keras-during-development
-import numpy as np
-import tensorflow as tf
-import random as rn
-
-# The below is necessary in Python 3.2.3 onwards to
-# have reproducible behavior for certain hash-based operations.
-# See these references for further details:
-# https://docs.python.org/3.4/using/cmdline.html#envvar-PYTHONHASHSEED
-# https://github.com/fchollet/keras/issues/2280#issuecomment-306959926
-
 import os
-os.environ['PYTHONHASHSEED'] = '0'
-
-# The below is necessary for starting Numpy generated random numbers
-# in a well-defined initial state.
-
-np.random.seed(42)
-
-# The below is necessary for starting core Python generated random numbers
-# in a well-defined state.
-
-rn.seed(12345)
-
-# Force TensorFlow to use single thread.
-# Multiple threads are a potential source of
-# non-reproducible results.
-# For further details, see: https://stackoverflow.com/questions/42022950/which-seeds-have-to-be-set-where-to-realize-100-reproducibility-of-training-res
-
-session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
-
-from keras import backend as K
-
-# The below tf.set_random_seed() will make random number generation
-# in the TensorFlow backend have a well-defined initial state.
-# For further details, see: https://www.tensorflow.org/api_docs/python/tf/set_random_seed
-
-tf.set_random_seed(1234)
-
-sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
-K.set_session(sess)
-########################################################################################################################################
-
 import sys
 import math
+import random as rn
 
 import cv2
+import numpy as np
 import pandas as pd
 
 from keras.models import Model
@@ -57,6 +16,7 @@ from keras.layers.normalization import BatchNormalization
 from keras.layers.core import Dropout, Activation
 from keras.optimizers import Adadelta, Adam
 from keras.callbacks import ModelCheckpoint, EarlyStopping
+from keras import backend as K
 
 import models
 
@@ -117,8 +77,8 @@ def gen_random_image():
         r_x = rn.randint(10, 50)
         r_y = rn.randint(10, 50)
         if(center_x+r_x < IMAGE_W and center_x-r_x > 0 and center_y+r_y < IMAGE_H and center_y-r_y > 0):
-            cv2.ellipse(img, (center_x, center_y), (r_x, r_y), 0, 0, 360, (obj1_color0, obj1_color1, obj1_color2), -1)
-            cv2.ellipse(mask_obj1, (center_x, center_y), (r_x, r_y), 0, 0, 360, 255, -1)
+            cv2.ellipse(img, (int(center_x), int(center_y)), (int(r_x), int(r_y)), int(0), int(0), int(360), (int(obj1_color0), int(obj1_color1), int(obj1_color2)), int(-1))
+            cv2.ellipse(mask_obj1, (int(center_x), int(center_y)), (int(r_x), int(r_y)), int(0), int(0), int(360), int(255), int(-1))
             break
     
     # Object class 2
@@ -272,10 +232,11 @@ def train():
     history = model.fit_generator(
         generator=batch_generator(batch_size),
         nb_epoch=epochs,
-        samples_per_epoch=batch_size,
+        samples_per_epoch=100,
         validation_data=batch_generator(batch_size),
-        nb_val_samples=batch_size,
+        nb_val_samples=10,
         verbose=1,
+        shuffle=False,
         callbacks=callbacks)
         
 if __name__ == '__main__':
